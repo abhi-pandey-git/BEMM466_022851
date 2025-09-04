@@ -60,7 +60,7 @@ MIT License. Free to use/modify with attribution.
 
 ## Author
 Abhishek Pandey (MSc Business Analytics, University of Exeter)  
-Contact: [your email or GitHub profile]  
+Contact: ap1204@exeter.ac.uk 
 Supervisor: Dr Thomas Birtch  
 
 Last updated: September 4, 2025
