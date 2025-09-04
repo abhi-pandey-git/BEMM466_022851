@@ -1,66 +1,143 @@
-# Monte Carlo Simulation for Construction SME Risk Analysis
+
+# Monte Carlo Simulation for Construction SME Risk (Cost & Schedule)
+
+[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+This repository contains a Python script that performs Monte Carlo simulations to assess cost overruns and schedule delays in small-to-medium enterprise (SME) construction projects. The model aggregates volatility proxies from various UK construction industry datasets to parameterize risks, incorporating labor shortages, material price fluctuations, and correlated uncertainties. It generates probabilistic forecasts, sensitivity analyses, and scenario comparisons to support risk management decisions.
+
+The simulation is designed for SME-scale projects (e.g., baseline ~12 months, ~£460k), but parameters can be customized for broader applications. Outputs include distributions, correlations, tornado charts, and CSVs for further analysis.
+
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Data Sources](#data-sources)
+- [Configuration Options](#configuration-options)
+- [Outputs](#outputs)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
 ## Overview
-This repository contains a Python script for running a Monte Carlo Simulation (MCS) to model cost and schedule risks in UK construction projects for small and medium-sized enterprises (SMEs). The simulation uses publicly available secondary data from sources like the Office for National Statistics (ONS) and National Audit Office (NAO) to derive risk parameters. It generates probabilistic forecasts, visualizations, and scenario analyses to help SMEs quantify uncertainties and improve decision-making.
+Construction projects, especially for SMEs, often face uncertainties leading to overruns. This script uses Monte Carlo methods to:
+- Derive risk parameters (e.g., labor shortage CV, cost volatility) from real datasets.
+- Model task durations (triangular distributions) and costs (lognormal multipliers with correlations).
+- Simulate coupled duration-cost scenarios, including overheads and time-based labor scaling.
+- Produce summaries, visualizations, and sensitivity insights for contingency planning.
+- Explore scenarios like high inflation or labor shortages.
 
-The script is part of a MSc Business Analytics dissertation project (BEMM466) at the University of Exeter, focusing on applying business analytics to project risk management.
+The approach emphasizes data-driven inputs from sources like ONS, BIS, and GMPP reports, making it grounded in UK construction trends.
 
-## Purpose
-- Simulate project durations and costs under uncertainty using triangular, lognormal, and normal distributions.
-- Incorporate correlated risks between duration and cost drivers.
-- Produce outputs like probability distributions, sensitivity analyses, and scenario comparisons (e.g., high inflation, high labour shortage).
-- Demonstrate MCS as a tool for transparent forecasting compared to deterministic methods.
-
-This addresses research questions on primary risks, MCS implementation with public data, forecast transparency, and tool challenges/benefits (Python-focused, with literature-based Excel comparisons).
+## Features
+- **Data Aggregation:** Parses Excel/CSV files to compute aggregated risks (e.g., vacancy CV for labor, OPI std for costs).
+- **Probabilistic Modeling:** Triangular durations, lognormal multipliers, correlated shocks (Pearson rho), and shared factors.
+- **Simulation Engine:** Runs 100,000+ iterations for durations, materials, labor, and overheads.
+- **Analyses:** Percentiles, overruns, correlations, tornado sensitivity, and scenario comparisons.
+- **Visualizations:** Histograms, CDFs, scatters, pie charts, box/violin plots, heatmaps, and KDEs (saved as PNGs).
+- **Outputs:** CSVs (results, summaries), console stats, and scenario forecasts.
 
 ## Requirements
-- Python 3.12+ (tested on 3.12.3)
-- Libraries: Install via `pip install numpy pandas matplotlib scipy seaborn`
-  - numpy: For numerical operations and random sampling.
-  - pandas: For data loading and manipulation.
-  - matplotlib & seaborn: For visualizations.
-  - scipy: For statistical distributions (triang, norm, lognorm, pearsonr).
-- No additional installations needed; script uses built-in REPL environment.
+- Python 3.8+
+- Libraries (install via `pip install -r requirements.txt`):
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - scipy
+  - openpyxl (for Excel parsing)
 
-Note: No internet access required; all data is local.
+The code handles file parsing robustly but assumes standard formats.
 
-## Data Files
-The script loads volatility proxies from the following public datasets (download from ONS/NAO websites and place in the same directory):
-- `series-310725.csv`: ONS UK Job Vacancies (Construction) for labour risk.
-- `bulletindataset9.xlsx`: ONS Construction Output Price Indices (OPI) for cost volatility.
-- `Construction Industry Structure 2024.xlsx`: ONS industry structure for weights.
-- `Government_Major_Projects_Portofolio_AR_Data_March_2024.xlsx`: NAO GMPP for variance benchmarks.
-- `bulletindataset7.xlsx`: ONS New Orders for changes.
-- `output-in-the-construction-industry-time-series-v26.xlsx`: ONS Output Time Series for changes.
-- `earn03jul2025.xls`: ONS Average Earnings for growth.
-- `Construction_building_materials_-_tables_February_2025.xlsx`: ONS Building Materials for changes.
+## Installation
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/monte-carlo-construction-sme-risk.git
+   cd monte-carlo-construction-sme-risk
+   ```
+2. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+   (Create `requirements.txt` with the listed libraries if not included.)
 
-These are aggregated public data; no personal/sensitive info. Ethical note: Used for low-risk secondary analysis per BPS/UEBS guidelines.
+3. Place data files in the root directory (see [Data Sources](#data-sources)).
 
-## How to Run
-1. Ensure all data files are in the working directory.
-2. Run the script: `python mcs_construction_risk.py`
-   - It loads data, aggregates risks, runs simulations (100,000 iterations), generates summaries, and saves outputs.
-3. Outputs:
-   - Console: Aggregated risks, summaries, percentiles, correlations.
-   - CSV: `mcs_results.csv` (full simulation data).
-   - PNGs: Visuals like histograms (`distributions_hist.png`), CDFs (`cdfs.png`), scatter (`scatter_duration_cost.png`), pie (`pie_cost_breakdown.png`), boxplots (`boxplot_results.png`), violins (`violin_distributions.png`), heatmap (`correlation_heatmap.png`), overrun curve (`cumulative_overrun_line.png`), tornado (`sensitivity_tornado.png`), scenario KDE (`scenario_costs_kde.png`).
+## Usage
+1. Ensure all required data files are in the project root.
+2. Run the script:
+   ```
+   python monte_carlo_sme_risk.py
+   ```
+3. The script will:
+   - Load and aggregate risks from files.
+   - Compute deterministic baseline.
+   - Run simulations.
+   - Print summaries (e.g., P50/P95, overruns, correlations).
+   - Save CSVs and plots.
+   - Execute scenario analyses (baseline, high inflation, high labor shortage).
 
-## Assumptions and Limitations
-- Distributions: Triangular for durations (bounded optimism/pessimism), lognormal for materials (right-skew), normal for labour noise.
-- Correlations: Target ρ=0.60 (literature-based), attenuated empirically to r≈0.36 due to noise.
-- Data: Aggregated proxies may mask SME-specifics; no real-time updates.
-- Model: Additive tasks (no critical path dependencies); hardcoded params (e.g., sigma_dur=0.20).
-- Ethical: Low-risk public data; no GenAI in core analysis.
+Customize tasks, parameters, or scenarios by editing the script (e.g., `tasks` list, `rho=0.60`).
 
-For details, see dissertation report. Reproducible with seed=42.
+## Data Sources
+The script processes the following files (place in root; some may be truncated in prompts but assume full datasets):
+- `series-310725.csv`: UK job vacancies (construction) for labor risk.
+- `bulletindataset9.xlsx`: Construction Output Price Indices (OPIs) for cost changes.
+- `Construction Industry Structure 2024.xlsx`: Sector weights for structure CV.
+- `Government_Major_Projects_Portofolio_AR_Data_March_2024.xlsx`: GMPP variances for project risks.
+- `bulletindataset7.xlsx`: New orders changes for demand volatility.
+- `output-in-the-construction-industry-time-series-v26.xlsx`: Output changes for industry fluctuations.
+- `earn03jul2025.xls`: Earnings growth for labor cost risks.
+- `Construction_building_materials_-_tables_February_2025.xlsx`: Material price changes.
+
+Sources: ONS (Office for National Statistics), BIS (Department for Business, Innovation & Skills), and IPA (Infrastructure and Projects Authority). If files are missing, the script uses defaults or skips.
+
+## Configuration Options
+Edit variables in the script:
+- `TRI_MIN/MODE/MAX`: Triangular duration ratios (default: 0.80/1.00/1.50 + risk).
+- `sigma_dur/sigma_mat/lab_noise_cv`: Std devs for multipliers/noise.
+- `rho`: Correlation between duration and cost shocks (default: 0.60).
+- `lab_time_share`: Share of labor scaling with time (default: 0.60).
+- `overhead_per_month`: Fixed overheads (£k/month, default: 5.0).
+- `n_sim`: Simulations (default: 100,000).
+- `tasks`: List of dicts with task names, base durations/materials/labors.
+
+For scenarios, adjust multipliers in `run_scenario()` calls.
+
+## Outputs
+- **CSVs:** `mcs_results.csv` (full sim data: durations, costs, components).
+- **Console Summary:** Aggregated risks, baselines, percentiles, overruns, correlations, scenario results.
+- **Plots (PNG):** 
+  - `distributions_hist.png`: Histograms of duration/cost.
+  - `cdfs.png`: Cumulative distribution functions.
+  - `scatter_duration_cost.png`: Scatter with correlation.
+  - `pie_cost_breakdown.png`: Average component shares.
+  - `hist_cost_changes.png`: Input cost % changes (placeholder).
+  - `boxplot_results.png`: Box plots.
+  - `violin_distributions.png`: Violin plots.
+  - `correlation_heatmap.png`: Component correlations.
+  - `cumulative_overrun_line.png`: Overrun risk curves.
+  - `sensitivity_tornado.png`: Sensitivity to shocks.
+  - `scenario_costs_kde.png`: KDEs for scenarios.
+
+## Examples
+- **Baseline Run:** Outputs P50 duration ~12-15 months, cost ~£500-600k (depending on risks).
+- **High Inflation Scenario:** Increases cost volatility (multiplier=1.15), shifting distributions right.
+- **Customization:** Add tasks or adjust `rho=0.8` for stronger coupling; re-run for updated plots.
+
+## Contributing
+Contributions are welcome! Fork the repo, make changes, and submit a pull request.
+- Report issues: Open a GitHub issue with details.
+- Enhancements: E.g., add more distributions (PERT), CPM integration, or optimization.
 
 ## License
-MIT License. Free to use/modify with attribution.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Author
-Abhishek Pandey (MSc Business Analytics, University of Exeter)  
-Contact: ap1204@exeter.ac.uk 
-Supervisor: Dr Thomas Birtch  
+## Acknowledgments
+- Inspired by construction risk literature (e.g., Flyvbjerg on overruns).
+- Data: ONS, BIS, IPA – thanks to UK public sources.
+- Libraries: NumPy, Pandas, Matplotlib, Seaborn, SciPy for efficient simulations.
 
-Last updated: September 4, 2025
+Contact: Abhishek Pandey (ap1204@exeter.ac.uk)
